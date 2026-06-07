@@ -1,0 +1,115 @@
+# backend/serverless.yml
+service: family-question-bank
+useDotenv: true # Enable native .env file support
+frameworkVersion: '3'
+
+#params:
+  #default:
+
+    #JWT_SECRET: ${env:JWT_SECRET}
+    #ADMIN_PASSWORD_HASH: ${env:ADMIN_PASSWORD_HASH}
+    #FRONTEND_URL: ${env:FRONTEND_URL}
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  logRetentionInDays: 14 # Standard practice: prevent infinite log storage costs
+  
+  environment:
+    JWT_SECRET: ${env:JWT_SECRET}
+    ADMIN_PASSWORD: ${env:ADMIN_PASSWORD}
+    ADMIN_PASSWORD_HASH: ${env:ADMIN_PASSWORD_HASH}
+    FRONTEND_URL: ${env:FRONTEND_URL}
+    NODE_ENV: production
+
+    DYNAMODB_TABLE: FamilyQuestionBank-${sls:stage}
+    S3_BUCKET: family-question-bank-images-${sls:stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: 
+            - !GetAtt QuestionBankTable.Arn
+            - !Join ['/', [!GetAtt QuestionBankTable.Arn, 'index/*']]
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource: 
+            - !Join ['/', [!GetAtt QuestionImagesBucket.Arn, '*']]
+
+functions:
+  api:
+    handler: src/app.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
+resources:
+  Resources:
+    QuestionBankTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: FamilyQuestionBank-${sls:stage}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: questionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: QuestionIdIndex
+            KeySchema:
+              - AttributeName: questionId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+    
+    QuestionImagesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: family-question-bank-images-${sls:stage}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['*']
+              AllowedMethods: [GET, PUT, POST, DELETE]
+              AllowedOrigins: ['*']
+              MaxAge: 3600
+
+    QuestionImagesBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref QuestionImagesBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource: !Join 
+                - ""
+                - - "arn:aws:s3:::"
+                  - !Ref QuestionImagesBucket
+                  - "/*"
