@@ -74,6 +74,50 @@ class DynamoDBService {
     return item;
   }
 
+  // Create a new student account
+  async createStudent(studentData) {
+    const timestamp = Date.now();
+    const username = String(studentData.username || '').trim().toLowerCase();
+
+    const item = {
+      PK: `STUDENT#${username}`,
+      SK: 'PROFILE',
+      type: 'STUDENT',
+      id: username,
+      username,
+      studentName: studentData.studentName,
+      grade: studentData.grade,
+      passwordHash: studentData.passwordHash,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+
+    const command = new PutCommand({
+      TableName: TABLE_NAME,
+      Item: item,
+      ConditionExpression: 'attribute_not_exists(PK)'
+    });
+
+    await docClient.send(command);
+    return item;
+  }
+
+  // Get a student by username
+  async getStudentByUsername(username) {
+    const normalisedUsername = String(username || '').trim().toLowerCase();
+
+    const command = new GetCommand({
+      TableName: TABLE_NAME,
+      Key: {
+        PK: `STUDENT#${normalisedUsername}`,
+        SK: 'PROFILE'
+      }
+    });
+
+    const response = await docClient.send(command);
+    return response.Item || null;
+  }
+
   // Get questions by year and subject
   async getQuestionsByYearAndSubject(year, subject, limit = 50) {
     const command = new QueryCommand({

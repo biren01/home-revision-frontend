@@ -21,6 +21,7 @@ const initialSignIn = {
 };
 
 const gradeOptions = ['Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11'];
+const allowLocalStudentFallback = import.meta.env.DEV;
 
 const LandingPage = () => {
   const [mode, setMode] = useState('signin');
@@ -58,13 +59,16 @@ const LandingPage = () => {
         student = normaliseStudentResponse(response.data, signUpForm);
         setCurrentStudent(student);
       } catch (apiError) {
+        if (!allowLocalStudentFallback) {
+          throw apiError;
+        }
         student = registerStudentLocally(signUpForm);
       }
 
       toast.success('Account created successfully');
       navigate('/student');
     } catch (error) {
-      toast.error(error.message || 'Unable to create account');
+      toast.error(error.response?.data?.error || error.message || 'Unable to create account');
     } finally {
       setSubmitting(false);
     }
@@ -81,13 +85,16 @@ const LandingPage = () => {
         student = normaliseStudentResponse(response.data, signInForm);
         setCurrentStudent(student);
       } catch (apiError) {
+        if (!allowLocalStudentFallback) {
+          throw apiError;
+        }
         student = signInStudentLocally(signInForm);
       }
 
       toast.success(`Welcome back, ${student.studentName}`);
       navigate('/student');
     } catch (error) {
-      toast.error(error.message || 'Invalid username or password');
+      toast.error(error.response?.data?.error || error.message || 'Invalid username or password');
     } finally {
       setSubmitting(false);
     }

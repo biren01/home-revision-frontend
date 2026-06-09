@@ -8,6 +8,7 @@ import serverless from 'serverless-http';
 import questionRoutes from './handlers/questions.js';
 import practiceRoutes from './handlers/practice.js';
 import adminRoutes from './handlers/admin.js';
+import studentRoutes from './handlers/students.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/questions', questionRoutes);
 app.use('/api/practice', practiceRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/students', studentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
