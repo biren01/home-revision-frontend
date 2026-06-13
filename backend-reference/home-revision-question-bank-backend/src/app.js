@@ -14,9 +14,29 @@ dotenv.config();
 
 const app = express();
 
+const getAllowedOrigins = () => [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || '').split(','),
+  process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : null,
+].map((origin) => origin?.trim()).filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (getAllowedOrigins().includes(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'amplifyapp.com' || hostname.endsWith('.amplifyapp.com');
+  } catch {
+    return false;
+  }
+};
+
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
+  origin: (origin, callback) => {
+    callback(null, isAllowedOrigin(origin));
+  },
   credentials: true
 }));
 app.use(express.json());

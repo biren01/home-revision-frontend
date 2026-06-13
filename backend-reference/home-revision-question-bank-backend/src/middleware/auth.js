@@ -230,12 +230,11 @@ export const validateAdminPassword = async (password) => {
  * Middleware to validate request origin (CSRF protection)
  */
 export const validateOrigin = (req, res, next) => {
-  // Define allowed origins strictly from environment variables
-  // Fallback to localhost only if explicitly in development mode
   const allowedOrigins = [
-    process.env.FRONTEND_URL, 
+    process.env.FRONTEND_URL,
+    ...(process.env.FRONTEND_URLS || '').split(','),
     process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : null
-  ].filter(Boolean); // Remove nulls/undefined
+  ].map((origin) => origin?.trim()).filter(Boolean);
 
   const origin = req.headers.origin;
 
@@ -244,7 +243,15 @@ export const validateOrigin = (req, res, next) => {
     return next();
   }
 
-  if (allowedOrigins.includes(origin)) {
+  let isAmplifyOrigin = false;
+  try {
+    const { hostname } = new URL(origin);
+    isAmplifyOrigin = hostname === 'amplifyapp.com' || hostname.endsWith('.amplifyapp.com');
+  } catch {
+    isAmplifyOrigin = false;
+  }
+
+  if (allowedOrigins.includes(origin) || isAmplifyOrigin) {
     next();
   } else {
     console.warn(`Blocked request from unauthorized origin: ${origin}`);

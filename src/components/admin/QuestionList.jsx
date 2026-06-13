@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI, questionAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import MathText from '../common/MathText';
 
 const isSelectedForStudents = (question) => (
   question.selectedForStudents === true ||
@@ -300,7 +301,9 @@ const QuestionList = ({ metadata, onRefresh }) => {
                           )}
                         </div>
 
-                        <p className="text-gray-900 mb-2">{question.questionText}</p>
+                        <p className="text-gray-900 mb-2">
+                          <MathText>{question.questionText}</MathText>
+                        </p>
 
                         {getQuestionImages(question).length > 0 && (
                           <div className="mb-3 flex flex-wrap gap-2">
@@ -326,7 +329,7 @@ const QuestionList = ({ metadata, onRefresh }) => {
                                 key={index}
                                 className={`text-sm ${index === question.correctAnswer ? 'text-green-600 font-medium' : 'text-gray-600'}`}
                               >
-                                {String.fromCharCode(65 + index)}. {option}
+                                {String.fromCharCode(65 + index)}. <MathText>{option}</MathText>
                                 {index === question.correctAnswer && ' Correct'}
                               </p>
                             ))}
@@ -335,7 +338,7 @@ const QuestionList = ({ metadata, onRefresh }) => {
 
                         {question.explanation && (
                           <p className="mt-2 text-sm text-gray-500">
-                            <strong>{getQuestionType(question) === 'subjective' ? 'Teacher notes:' : 'Explanation:'}</strong> {question.explanation}
+                            <strong>{getQuestionType(question) === 'subjective' ? 'Teacher notes:' : 'Explanation:'}</strong> <MathText>{question.explanation}</MathText>
                           </p>
                         )}
                       </div>

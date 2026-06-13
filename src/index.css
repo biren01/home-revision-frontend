@@ -59,4 +59,20 @@ button:disabled {
   .secondary-button {
     @apply inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50;
   }
+
+  .mathlive-field {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: white;
+    padding: 10px 12px;
+    font-size: 18px;
+  }
+
+  .math-text .katex-display {
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
 }

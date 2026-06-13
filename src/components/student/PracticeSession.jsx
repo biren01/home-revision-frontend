@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import QuizCard from './QuizCard';
 import { practiceAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import MathText from '../common/MathText';
 
 const isSelectedForStudents = (question) => (
   question.selectedForStudents === true ||
@@ -188,14 +189,14 @@ const PracticeSession = ({ config, onEnd }) => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="mb-2 font-medium text-slate-950">
-                      Question {index + 1}: {question?.questionText}
+                      Question {index + 1}: <MathText>{question?.questionText}</MathText>
                     </p>
                     <p className={`text-sm font-semibold ${result.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
                       {result.isCorrect ? 'Correct' : 'Incorrect'}
                     </p>
                     {!result.isCorrect && (
                       <p className="mt-2 text-sm text-slate-600">
-                        <strong>Explanation:</strong> {result.explanation}
+                        <strong>Explanation:</strong> <MathText>{result.explanation}</MathText>
                       </p>
                     )}
                   </div>

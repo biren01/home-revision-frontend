@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { questionAPI, adminAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import MathEditor from '../common/MathEditor';
 
 const getQuestionImages = (question) => {
   const images = Array.isArray(question.imageUrls) ? question.imageUrls.filter(Boolean) : [];
@@ -308,12 +309,11 @@ const QuestionForm = ({ metadata, onSuccess }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Question Text *</label>
-          <textarea
+          <MathEditor
+            label="Question Text *"
             value={formData.questionText}
-            onChange={(e) => handleInputChange('questionText', e.target.value)}
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            onChange={(value) => handleInputChange('questionText', value)}
+            rows={3}
             placeholder="Enter your question here..."
             required
           />
@@ -376,14 +376,16 @@ const QuestionForm = ({ metadata, onSuccess }) => {
                   <span className="text-sm font-medium text-gray-600 w-6">
                     {String.fromCharCode(65 + index)}.
                   </span>
-                  <input
-                    type="text"
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    required={formData.questionType === 'multiple-choice'}
-                  />
+                  <div className="flex-1">
+                    <MathEditor
+                      label={`Option ${String.fromCharCode(65 + index)}`}
+                      value={option}
+                      onChange={(value) => handleOptionChange(index, value)}
+                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                      rows={1}
+                      required={formData.questionType === 'multiple-choice'}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -397,14 +399,11 @@ const QuestionForm = ({ metadata, onSuccess }) => {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            {formData.questionType === 'multiple-choice' ? 'Explanation (Optional)' : 'Teacher Notes / Mark Scheme (Optional)'}
-          </label>
-          <textarea
+          <MathEditor
+            label={formData.questionType === 'multiple-choice' ? 'Explanation (Optional)' : 'Teacher Notes / Mark Scheme (Optional)'}
             value={formData.explanation}
-            onChange={(e) => handleInputChange('explanation', e.target.value)}
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            onChange={(value) => handleInputChange('explanation', value)}
+            rows={3}
             placeholder={formData.questionType === 'multiple-choice'
               ? 'Explain why the answer is correct...'
               : 'Add notes or a suggested answer for the teacher...'}

@@ -1,4 +1,5 @@
 import React from 'react';
+import MathText from '../common/MathText';
 
 const getQuestionImages = (question) => {
   const images = Array.isArray(question.imageUrls) ? question.imageUrls.filter(Boolean) : [];
@@ -34,7 +35,7 @@ const QuizCard = ({ question, displayNumber, selectedAnswer, onAnswer }) => {
           </span>
         </div>
         <p className="text-lg font-medium leading-8 text-slate-950">
-          {question.questionText}
+          <MathText>{question.questionText}</MathText>
         </p>
 
         {questionImages.length > 0 && (
@@ -84,7 +85,7 @@ const QuizCard = ({ question, displayNumber, selectedAnswer, onAnswer }) => {
               <span className="mr-3 font-bold text-brand-700">
                 {String.fromCharCode(65 + index)}.
               </span>
-              {option}
+              <MathText>{option}</MathText>
             </button>
           ))}
         </div>
